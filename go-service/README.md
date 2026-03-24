@@ -1,23 +1,19 @@
 # Go Student Service
 
-A Go service that fetches student details from an API and generates PDF reports.
+A Go service that generates PDF reports from student data payload.
 
 ## Features
 
-- ✅ Fetch student details from external API (`/api/v1/students/:id`)
-- ✅ Generate PDF reports from external API data
-- ✅ **NEW**: Generate PDF reports directly from student data payload
+- ✅ Generate PDF reports directly from student data payload
 - ✅ RESTful API endpoints  
 - ✅ Health check endpoint
-- ✅ Configurable via environment variables
 - ✅ Clean, modular architecture
+- ✅ No external API dependencies
 
 ## API Endpoints
 
 - `GET /health` - Health check endpoint
-- `GET /students/{id}` - Get student details as JSON
-- `GET /students/{id}/pdf` - Generate and download PDF report for student (using external API)
-- `POST /students/pdf` - **NEW**: Generate PDF report from student data in request payload
+- `POST /students/pdf` - Generate PDF report from student data in request payload
 
 ## Quick Start
 
@@ -36,13 +32,7 @@ A Go service that fetches student details from an API and generates PDF reports.
    # Health check
    curl http://localhost:8080/health
    
-   # Get student JSON (replace with your student API URL)
-   curl http://localhost:8080/students/2
-   
-   # Download PDF report (using external API)
-   curl -o student_report.pdf http://localhost:8080/students/2/pdf
-   
-   # Generate PDF from payload data (NEW)
+   # Generate PDF from payload data
    curl -X POST http://localhost:8080/students/pdf \
      -H "Content-Type: application/json" \
      -d '{
@@ -68,7 +58,7 @@ A Go service that fetches student details from an API and generates PDF reports.
        "admissionDate": "2020-08-15T00:00:00.000Z",
        "reporterName": "Principal Johnson"
      }' \
-     -o student_payload_report.pdf
+     -o student_report.pdf
    ```
 
 4. **Use the demo script:**
@@ -81,11 +71,9 @@ A Go service that fetches student details from an API and generates PDF reports.
 Configure via environment variables:
 
 - `PORT` - Server port (default: 8080)
-- `STUDENT_API_URL` - Base URL for student API (default: http://localhost:3000)
 
 Example:
 ```bash
-export STUDENT_API_URL=https://your-api.com
 export PORT=3000
 go run .
 ```
@@ -123,12 +111,17 @@ When using the POST `/students/pdf` endpoint, send JSON data with this structure
 ## Architecture
 
 ```
-├── main.go          # Application entry point
-├── config.go        # Configuration management
-├── student.go       # Student struct and API client
-├── pdf.go          # PDF generation logic
-├── handlers.go     # HTTP handlers
-└── go.mod          # Go module definition
+├── main.go              # Application entry point
+├── demo-payload-pdf.sh  # Demo script
+├── config/
+│   └── config.go        # Configuration management
+├── handlers/
+│   └── handlers.go      # HTTP handlers
+├── pdf/
+│   └── pdf.go          # PDF generation logic  
+├── student/
+│   └── student.go      # Student data structure
+└── go.mod              # Go module definition
 ```
 
 ## PDF Report Includes
@@ -147,22 +140,24 @@ When using the POST `/students/pdf` endpoint, send JSON data with this structure
 ## Example Usage
 
 ```go
-// Initialize the service
-studentService := NewStudentService("https://your-api.com")
-pdfGenerator := NewPDFGenerator()
+// Initialize the PDF generator
+pdfGenerator := pdf.NewGenerator()
 
-// Fetch student data
-student, err := studentService.GetStudent("2")
+// Create server
+server := handlers.NewServer(pdfGenerator)
+
+// Student data from request payload
+var student student.Student
+json.Unmarshal(requestBody, &student)
 
 // Generate PDF
-pdfBytes, err := pdfGenerator.GenerateStudentReport(student)
+pdfBytes, err := pdfGenerator.GenerateStudentReport(&student)
 ```
 
 ## Error Handling
 
 The service includes comprehensive error handling:
-- API connection errors
-- Invalid student IDs
+- Invalid JSON payload validation
 - PDF generation failures
 - Proper HTTP status codes and error messages
 
@@ -188,7 +183,6 @@ go test ./...
 
 2. Set environment variables:
    ```bash
-   export STUDENT_API_URL=https://your-production-api.com
    export PORT=8080
    ```
 

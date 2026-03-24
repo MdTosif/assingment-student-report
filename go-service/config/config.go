@@ -6,15 +6,13 @@ import (
 
 // Config holds the application configuration
 type Config struct {
-	Port           string
-	StudentAPIURL  string
+	Port string
 }
 
 // LoadConfig loads configuration from environment variables with defaults
 func LoadConfig() *Config {
 	config := &Config{
-		Port:          getEnv("PORT", "8080"),
-		StudentAPIURL: getEnv("STUDENT_API_URL", "http://localhost:3000"),
+		Port: getEnv("PORT", "8080"),
 	}
 	
 	return config
