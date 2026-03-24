@@ -43,6 +43,7 @@ export const studentApi = api.injectEndpoints({
       }),
       invalidatesTags: [Tag.STUDENTS]
     }),
+
     updateStudent: builder.mutation<{ message: string }, StudentPropsWithId>({
       query: ({ id, ...payload }) => ({
         url: `/students/${id}`,
@@ -50,6 +51,13 @@ export const studentApi = api.injectEndpoints({
         body: payload
       }),
       invalidatesTags: (_result, _error, { id }) => [{ type: Tag.STUDENTS, id }]
+    }),
+    downloadStudentReport: builder.mutation<Blob, string>({
+      query: (id) => ({
+        url: `/students/${id}/report`,
+        method: 'GET',
+        responseHandler: (response) => response.blob()
+      })
     }),
     getTeachers: builder.query<GetTeachers, void>({
       query: () => `/teachers`
@@ -63,5 +71,6 @@ export const {
   useReviewStudentStatusMutation,
   useAddStudentMutation,
   useUpdateStudentMutation,
+  useDownloadStudentReportMutation,
   useGetTeachersQuery
 } = studentApi;

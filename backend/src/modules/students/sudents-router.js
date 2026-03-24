@@ -5,6 +5,7 @@ const studentController = require("./students-controller");
 router.get("", studentController.handleGetAllStudents);
 router.post("", studentController.handleAddStudent);
 router.get("/:id", studentController.handleGetStudentDetail);
+router.get("/:id/report", studentController.handleGetStudentReport);
 router.post("/:id/status", studentController.handleStudentStatus);
 router.put("/:id", studentController.handleUpdateStudent);
 

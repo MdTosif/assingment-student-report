@@ -46,6 +46,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ id }) => {
           email={email}
           selectedClass={className}
           section={section}
+          id={id?.toString() || ''}
         />
       </Grid2>
       <Grid2 size={{ xs: 12, md: 7 }}>

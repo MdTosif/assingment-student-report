@@ -1,6 +1,8 @@
 const { ApiError, sendAccountVerificationEmail } = require("../../utils");
 const { findAllStudents, findStudentDetail, findStudentToSetStatus, addOrUpdateStudent } = require("./students-repository");
 const { findUserById } = require("../../shared/repository");
+const { processDBRequest } = require("../../utils");
+const axios = require("axios");
 
 const checkStudentId = async (id) => {
     const isStudentFound = await findUserById(id);
@@ -49,6 +51,28 @@ const addNewStudent = async (payload) => {
     }
 }
 
+const getStudentReport = async (id) => {
+    // Get the student data first
+    const studentData = await getStudentDetail(id);
+
+    try {
+        const response = await axios({
+            method: 'post',
+            url: `${process.env.GO_SERVICE_URL}/students/pdf`,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: studentData,
+            responseType: 'arraybuffer'
+        });
+        
+        return response.data;
+    } catch (error) {
+        console.error(`Error generating PDF for student ${id}:`, error.message);
+        throw new ApiError(500, 'Failed to generate student report');
+    }
+}
+
 const updateStudent = async (payload) => {
     const result = await addOrUpdateStudent(payload);
     if (!result.status) {
@@ -75,4 +99,5 @@ module.exports = {
     addNewStudent,
     setStudentStatus,
     updateStudent,
+    getStudentReport,
 };
